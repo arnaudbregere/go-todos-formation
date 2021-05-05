@@ -1,9 +1,12 @@
 package main
 
 import (
+    "database/sql"
+    "fmt"
     "formation/api"
     "formation/serverweb"
     "net/http"
+    _ "github.com/lib/pq"
 )
 
 func main() {
@@ -72,8 +75,37 @@ func main() {
     http.HandleFunc("/update", serverweb.Update)
 
 
+    const (
+        host     = "db-todo"
+        port     = 5432
+        user     = "user1"
+        password = "motdepasse"
+        dbname   = "dbtodo"
+    )
+
+    psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+    println(psqlconn)
+    // open database
+    db, err := sql.Open("postgres", psqlconn)
+    CheckError(err)
+
+    // close database
+    defer db.Close()
+
+    // check db
+    err = db.Ping()
+    CheckError(err)
+
+    fmt.Println("Connected!")
+
     erreur := http.ListenAndServe(":8090", nil)
     println(erreur.Error())
+}
+
+func CheckError(err error) {
+    if err != nil {
+        panic(err)
+    }
 }
 
 
