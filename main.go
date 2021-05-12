@@ -5,8 +5,8 @@ import (
     "fmt"
     "formation/api"
     "formation/serverweb"
-    "net/http"
     _ "github.com/lib/pq"
+    "net/http"
 )
 
 func main() {
@@ -76,7 +76,7 @@ func main() {
 
 
     const (
-        host     = "db-todo"
+        host     = "172.17.0.1"
         port     = 5432
         user     = "user1"
         password = "motdepasse"
@@ -97,12 +97,23 @@ func main() {
     CheckError(err)
 
     fmt.Println("Connected!")
+    RecordTest(db)
 
     erreur := http.ListenAndServe(":8090", nil)
     println(erreur.Error())
 }
 
 func CheckError(err error) {
+    if err != nil {
+        panic(err)
+    }
+}
+
+func RecordTest(myDb *sql.DB) {
+    sqlStatement := `
+INSERT INTO user (email, password)
+VALUES ('arnaud@arnaud.fr', 'motdepasseArnaud')`
+    _, err := myDb.Exec(sqlStatement)
     if err != nil {
         panic(err)
     }
