@@ -73,6 +73,7 @@ func main() {
     http.HandleFunc("/get", serverweb.GetTodo)
     http.HandleFunc("/del", serverweb.Delete)
     http.HandleFunc("/update", serverweb.Update)
+    http.HandleFunc("/health", serverweb.Health)
 
 
     const (
@@ -88,6 +89,8 @@ func main() {
     // open database
     db, err := sql.Open("postgres", psqlconn)
     CheckError(err)
+
+    api.DataBasePtr = db
 
     // close database
     defer db.Close()
@@ -105,19 +108,24 @@ func main() {
 
 func CheckError(err error) {
     if err != nil {
-        panic(err)
+      //  panic(err)
     }
 }
 
 func RecordTest(myDb *sql.DB) {
-    sqlStatement := `
-INSERT INTO user (email, password)
-VALUES ('arnaud@arnaud.fr', 'motdepasseArnaud')`
-    _, err := myDb.Exec(sqlStatement)
+    sqlStatement := `INSERT INTO "user" ("email", "password") VALUES ($1, $2) RETURNING id`
+    id := 0
+    err := myDb.QueryRow(sqlStatement, "test@test.com", "arnaud").Scan(&id)
+    println("id :", id)
+   // _, err := myDb.Exec(sqlStatement)
     if err != nil {
         panic(err)
     }
+
 }
+
+
+
 
 
 /*func SetTodo (todo api.Todo, titre string) {
